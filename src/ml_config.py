@@ -28,6 +28,7 @@ class ExperimentDefinition:
     notes: str
 
 
+
 UM_EXPERIMENTS: list[ExperimentDefinition] = [
     ExperimentDefinition(
         experiment_id="classification_divorce_decision_tree_max_depth",
@@ -41,8 +42,8 @@ UM_EXPERIMENTS: list[ExperimentDefinition] = [
         notes="Parametr do raportu głównego.",
     ),
     ExperimentDefinition(
-        experiment_id="regression_children_decision_tree_max_depth",
-        task_name="regression_children",
+        experiment_id="regression_years_decision_tree_max_depth",
+        task_name="regression_years",
         model_key="decision_tree_regression",
         owner="person2",
         tuned_param="max_depth",
@@ -63,8 +64,8 @@ UM_EXPERIMENTS: list[ExperimentDefinition] = [
         notes="Parametr do raportu głównego.",
     ),
     ExperimentDefinition(
-        experiment_id="regression_children_random_forest_n_estimators",
-        task_name="regression_children",
+        experiment_id="regression_years_random_forest_n_estimators",
+        task_name="regression_years",
         model_key="random_forest_regression",
         owner="person2",
         tuned_param="n_estimators",
@@ -85,8 +86,8 @@ UM_EXPERIMENTS: list[ExperimentDefinition] = [
         notes="Parametr do raportu głównego.",
     ),
     ExperimentDefinition(
-        experiment_id="regression_children_knn_n_neighbors",
-        task_name="regression_children",
+        experiment_id="regression_years_knn_n_neighbors",
+        task_name="regression_years",
         model_key="knn_regression",
         owner="person3",
         tuned_param="n_neighbors",
@@ -107,8 +108,8 @@ UM_EXPERIMENTS: list[ExperimentDefinition] = [
         notes="Parametr do raportu głównego.",
     ),
     ExperimentDefinition(
-        experiment_id="regression_children_gradient_boosting_learning_rate",
-        task_name="regression_children",
+        experiment_id="regression_years_gradient_boosting_learning_rate",
+        task_name="regression_years",
         model_key="gradient_boosting_regression",
         owner="person3",
         tuned_param="learning_rate",

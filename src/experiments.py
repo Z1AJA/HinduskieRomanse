@@ -160,7 +160,7 @@ def generate_plots(task_name: str) -> None:
 
 
 if __name__ == "__main__":
-    tasks = ["classification_divorce", "regression_children"]
+    tasks = ["classification_divorce", "regression_years"]
     
     EXPERIMENT_SCHEMAS_EXACT = {
         "test_hidden_layer": {"hidden_layer_sizes": [[8], [16, 8], [32, 16], [32, 16, 8]]},

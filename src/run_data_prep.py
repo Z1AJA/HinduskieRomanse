@@ -6,7 +6,7 @@ from .data_loader import ProjectDataLoader
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Przygotowanie danych dla wybranego tasku.")
-    parser.add_argument("--task", required=True, help="Np. classification_divorce lub regression_children")
+    parser.add_argument("--task", required=True, help="Np. classification_divorce lub regression_years")
     parser.add_argument("--test-size", type=float, default=0.20, help="Rozmiar zbioru testowego, np. 0.2")
     parser.add_argument("--random-state", type=int, default=42, help="Seed")
     parser.add_argument("--no-scale", action="store_true", help="Wyłącz skalowanie zmiennych liczbowych")

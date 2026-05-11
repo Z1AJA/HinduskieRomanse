@@ -16,8 +16,8 @@ def test_prepare_classification_divorce():
     assert prepared.metadata["problem_type"] == "classification"
 
 
-def test_prepare_regression_children():
+def test_prepare_regression_years():
     loader = ProjectDataLoader()
-    prepared = loader.prepare("regression_children")
+    prepared = loader.prepare("regression_years")
     assert prepared.y_train.ndim == 2
     assert prepared.metadata["problem_type"] == "regression"
