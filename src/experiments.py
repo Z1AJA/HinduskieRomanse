@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 from .config import PROCESSED_DATA_DIR, RESULTS_DIR, TASK_CONFIGS
-from .data_loader import load_npz_dataset
+from .data_loader import ProjectDataLoader, load_npz_dataset
 from .metrics import accuracy, mse
 from .neural_network import NeuralNetwork
 
@@ -121,6 +121,73 @@ def run_experiments(task_name: str, experiment_grid: dict[str, list[Any]], n_rep
                       f"Train: {train_metric:.4f}, Test: {test_metric:.4f}")
 
 
+def run_split_experiments(task_name: str, split_sizes: list[float], n_repeats: int = 3) -> None:
+    if task_name not in TASK_CONFIGS:
+        raise ValueError(f"Nieznany task: {task_name}")
+
+    problem_type = TASK_CONFIGS[task_name]["problem_type"]
+    csv_path = get_default_results_path(task_name)
+    write_header = not csv_path.exists()
+    run_group_id = int(time.time())
+
+    hidden_layer_sizes = [16, 8]
+
+    with open(csv_path, mode="a", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        if write_header:
+            writer.writerow([
+                "task", "run_id", "param_name", "param_value",
+                "train_metric", "test_metric",
+                "epochs", "learning_rate", "batch_size",
+                "hidden_layers", "hidden_units"
+            ])
+
+        for test_size in split_sizes:
+            loader = ProjectDataLoader()
+            prepared = loader.prepare(task_name=task_name, test_size=test_size)
+            X_train = prepared.X_train
+            X_test = prepared.X_test
+            y_train = prepared.y_train
+            y_test = prepared.y_test
+
+            input_dim = X_train.shape[1]
+            layer_sizes = [input_dim] + hidden_layer_sizes + [1]
+
+            for repeat in range(n_repeats):
+                seed = 42 + repeat
+                model = NeuralNetwork(
+                    layer_sizes=layer_sizes,
+                    problem_type=problem_type,
+                    activation="relu",
+                    learning_rate=0.01,
+                    epochs=100,
+                    batch_size=32,
+                    weight_init="xavier",
+                    random_state=seed,
+                )
+                model.fit(X_train, y_train)
+                y_train_pred = model.predict(X_train)
+                y_test_pred = model.predict(X_test)
+
+                if problem_type == "classification":
+                    train_metric = accuracy(y_train, y_train_pred)
+                    test_metric = accuracy(y_test, y_test_pred)
+                else:
+                    train_metric = mse(y_train, y_train_pred)
+                    test_metric = mse(y_test, y_test_pred)
+
+                writer.writerow([
+                    task_name, f"{run_group_id}_{repeat}",
+                    "test_size", str(test_size),
+                    train_metric, test_metric,
+                    100, 0.01, 32, len(hidden_layer_sizes),
+                    "-".join(map(str, hidden_layer_sizes)),
+                ])
+                f.flush()
+                print(f"[{task_name}] test_size={test_size} | Powtórzenie {repeat+1}/{n_repeats} | "
+                      f"Train: {train_metric:.4f}, Test: {test_metric:.4f}")
+
+
 def generate_plots(task_name: str) -> None:
     csv_path = get_default_results_path(task_name)
     if not csv_path.exists():
@@ -166,18 +233,24 @@ if __name__ == "__main__":
         "test_hidden_layer": {"hidden_layer_sizes": [[8], [16, 8], [32, 16], [32, 16, 8]]},
         "test_epochs": {"epochs": [10, 50, 100, 200]},
         "test_batch_size": {"batch_size": [16, 32, 64, 128]},
-        "test_learning_rate": {"learning_rate": [0.001, 0.01, 0.05, 0.1]}
+        "test_learning_rate": {"learning_rate": [0.001, 0.01, 0.05, 0.1]},
+        "test_activation": {"activation": ["relu", "sigmoid", "tanh", "leaky_relu"]},
+        "test_weight_init": {"weight_init": ["xavier", "he", "random", "lecun"]},
+        "test_n_layers": {"hidden_layer_sizes": [[32], [32, 32], [32, 32, 32], [32, 32, 32, 32]]},
     }
-    
+
     for task in tasks:
-        print(f"\nUruchamiam domknięcie eksperymentów dla tasku: {task}")
+        print(f"\nUruchamiam eksperymenty dla tasku: {task}")
         for exp_name, grid in EXPERIMENT_SCHEMAS_EXACT.items():
             print(f"-> {exp_name}")
             try:
                 run_experiments(task_name=task, experiment_grid=grid, n_repeats=3)
             except FileNotFoundError:
-                print(f"UWAGA: Brakuje danych dla {task}. Odpal najpierw np. python3 -m src.run_data_prep --task {task}")
-            
+                print(f"UWAGA: Brakuje danych dla {task}. Odpal najpierw python3 -m src.run_data_prep --task {task}")
+
+        print("-> test_split_size")
+        run_split_experiments(task_name=task, split_sizes=[0.10, 0.20, 0.30, 0.40], n_repeats=3)
+
         generate_plots(task)
-        
-    print("\nEksperymenty dla obu zadań zakończone i zabezpieczone sukcesem!")
+
+    print("\nWszystkie eksperymenty zakończone.")

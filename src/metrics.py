@@ -1,8 +1,3 @@
-"""
-Wspólne metryki dla Osoby 3 i 4.
-Można rozbudować później, ale interfejs jest prosty.
-"""
-
 from __future__ import annotations
 
 import numpy as np

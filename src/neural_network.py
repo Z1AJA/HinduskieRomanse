@@ -1,8 +1,3 @@
-"""
-Szkielet dla Osoby 2.
-Cel: własna implementacja SSN w NumPy, zgodna z danymi z `src.data_loader`.
-"""
-
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -66,7 +61,6 @@ class NeuralNetwork:
             zs.append(Z)
             
             if i == len(self.weights) - 1:
-                # Output layer
                 if self.output_activation == "sigmoid":
                     A = 1.0 / (1.0 + np.exp(-np.clip(Z, -250, 250)))
                 elif self.output_activation == "linear":
@@ -74,13 +68,14 @@ class NeuralNetwork:
                 else:
                     raise ValueError(f"Unsupported output_activation: {self.output_activation}")
             else:
-                # Hidden layer
                 if self.activation == "relu":
                     A = np.maximum(0, Z)
                 elif self.activation == "sigmoid":
                     A = 1.0 / (1.0 + np.exp(-np.clip(Z, -250, 250)))
                 elif self.activation == "tanh":
                     A = np.tanh(Z)
+                elif self.activation == "leaky_relu":
+                    A = np.where(Z > 0, Z, 0.01 * Z)
                 else:
                     raise ValueError(f"Unsupported activation: {self.activation}")
                     
@@ -93,10 +88,8 @@ class NeuralNetwork:
         y_pred = activations[-1]
         
         if self.problem_type == "classification":
-            # Derivative for BCE loss + Sigmoid activation
             dZ = (y_pred - y_true) / m
         elif self.problem_type == "regression":
-            # Derivative for MSE loss + Linear activation
             dZ = 2.0 * (y_pred - y_true) / m
         else:
             raise ValueError(f"Unsupported problem_type: {self.problem_type}")
@@ -126,6 +119,8 @@ class NeuralNetwork:
                 elif self.activation == "tanh":
                     t = np.tanh(Z_prev)
                     dZ = dA_prev * (1.0 - t**2)
+                elif self.activation == "leaky_relu":
+                    dZ = dA_prev * np.where(Z_prev > 0, 1.0, 0.01)
                     
         dW_list.reverse()
         db_list.reverse()
@@ -138,13 +133,6 @@ class NeuralNetwork:
         X_val: Optional[np.ndarray] = None,
         y_val: Optional[np.ndarray] = None,
     ) -> TrainingHistory:
-        """
-        Oczekiwane minimum:
-        - forward pass
-        - backward pass
-        - update wag
-        - zapis historii loss
-        """
         np.random.seed(self.random_state)
         self.weights = []
         self.biases = []
@@ -160,6 +148,8 @@ class NeuralNetwork:
                 W = np.random.randn(n_in, n_out) * np.sqrt(2.0 / n_in)
             elif self.weight_init == "random":
                 W = np.random.randn(n_in, n_out) * 0.01
+            elif self.weight_init == "lecun":
+                W = np.random.randn(n_in, n_out) * np.sqrt(1.0 / n_in)
             else:
                 raise ValueError(f"Unknown weight initialization: {self.weight_init}")
                 
@@ -192,7 +182,6 @@ class NeuralNetwork:
                     self.weights[j] -= self.learning_rate * dW_list[j]
                     self.biases[j] -= self.learning_rate * db_list[j]
 
-            # Comput loss at the end of epoch
             train_preds, _ = self._forward(X_train)
             if self.problem_type == "regression":
                 train_l = np.mean((y_train - train_preds[-1])**2)
@@ -216,10 +205,6 @@ class NeuralNetwork:
         return history
 
     def predict(self, X: np.ndarray) -> np.ndarray:
-        """
-        - regresja: zwróć wartości ciągłe
-        - klasyfikacja binarna: zwróć 0/1 albo probability + osobna metoda predict_proba
-        """
         activations, _ = self._forward(X)
         out = activations[-1]
         
@@ -229,9 +214,6 @@ class NeuralNetwork:
             return (out > 0.5).astype(int).flatten()
 
     def predict_proba(self, X: np.ndarray) -> np.ndarray:
-        """
-        Opcjonalne, ale przydatne dla klasyfikacji.
-        """
         if self.problem_type != "classification":
             raise ValueError("predict_proba is only available for classification.")
         activations, _ = self._forward(X)
