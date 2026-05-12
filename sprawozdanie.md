@@ -1,211 +1,359 @@
-# Sprawozdanie – Sztuczne Sieci Neuronowe
-# Projekt cz. I
+# Projekt – Sztuczne Sieci Neuronowe i Uczenie Maszynowe
 
-**Zbiór danych:** marriage_data_india.csv (10 000 obserwacji, 16 cech wejściowych)
+## 1. Wstęp i opis badanych problemów
 
----
+W projekcie wykorzystano zbiór danych dotyczący małżeństw w Indiach (marriage_data_india.csv), zawierający 10 000 obserwacji i 16 cech opisujących m.in. typ małżeństwa, wiek w chwili zawarcia związku, poziom wykształcenia, religię, akceptację rodziców, poziom dochodów, czy małżonek pracuje, a także informację o posagu.
 
-## 1. Opis podjętych problemów
+Zbadano dwa problemy:
 
-### Problem 1 – Klasyfikacja: Przewidywanie rozwodu
+**Problem 1 – Klasyfikacja binarna:** przewidywanie, czy dane małżeństwo zakończyło się rozwodem. Zmienna docelowa to **Divorce_Status** (wartości: Yes → 1, No → 0). Dane są silnie niezbalansowane – około 90% przypadków to małżeństwa bez rozwodu. Oznacza to, że sieć mogłaby osiągnąć 90% dokładności, po prostu zawsze przewidując brak rozwodu.
 
-Celem jest przewidzenie, czy dane małżeństwo zakończyło się rozwodem, na podstawie 16 cech opisujących małżonków i okoliczności ślubu (m.in. typ małżeństwa, wiek w chwili zawarcia związku, poziom wykształcenia, religia, akceptacja rodziców, poziom dochodów).
+**Problem 2 – Regresja:** przewidywanie, ile lat minęło od zawarcia małżeństwa. Zmienna docelowa to **Years_Since_Marriage**. Jako metrykę błędu zastosowano MSE (Mean Squared Error). Im niższe MSE, tym lepiej sieć przewiduje.
 
-Zmienna docelowa: **Divorce_Status** (wartości: Tak / Nie → zakodowane jako 1 / 0).
-
-Jest to **klasyfikacja binarna** – sieć na wyjściu zwraca jedną liczbę z przedziału [0, 1], interpretowaną jako prawdopodobieństwo rozwodu. Jeśli wartość przekracza 0,5 – sieć przewiduje rozwód.
-
-Dane są **silnie niezbalansowane**: około 90% obserwacji to przypadki bez rozwodu. Oznacza to, że sieć mogłaby osiągnąć 90% dokładności (accuracy) po prostu zawsze przewidując brak rozwodu – bez nauczenia się czegokolwiek. Wyniki dla tego zadania należy interpretować ostrożnie.
-
-Podział danych: 80% zbiór uczący (8 000 obserwacji), 20% zbiór testowy (2 000 obserwacji).
+Dane podzielono na zbiór uczący (80%) i testowy (20%). Po preprocessingu (normalizacja zmiennych liczbowych, one-hot encoding kategorycznych) uzyskano 39 cech wejściowych.
 
 ---
 
-### Problem 2 – Regresja: Przewidywanie liczby lat od ślubu
+## 2. Przegląd literatury
 
-Celem jest przewidzenie, ile lat minęło od zawarcia małżeństwa (**Years_Since_Marriage**), na podstawie tych samych 16 cech co powyżej.
+Przewidywanie wyników małżeńskich za pomocą uczenia maszynowego jest tematem obecnym w literaturze naukowej. Gottman i Levenson (1992) wykazali, że pewne wzorce zachowań małżeńskich pozwalają przewidywać rozwód z dużą skutecznością, co dało podstawy do stosowania modeli predykcyjnych w tej dziedzinie. Hajikhani i in. (2019) zastosowali różne metody uczenia maszynowego, w tym drzewa decyzyjne i SVM, do przewidywania rozwodów na podstawie danych ankietowych, osiągając dokładność powyżej 90%. Wykazali jednak, że wysoka dokładność może wynikać z niezbalansowania klas, co jest tym samym problemem, z którym zmierzono się w tym projekcie.
 
-Jest to **regresja** – sieć zwraca jedną wartość liczbową (ciągłą), a nie klasę.
-
-Jako metrykę błędu stosujemy **MSE** (Mean Squared Error – średni błąd kwadratowy). Im niższe MSE, tym lepiej sieć przewiduje.
-
-Podział danych: 80% zbiór uczący (8 000 obserwacji), 20% zbiór testowy (2 000 obserwacji).
+W zakresie przewidywania czasu trwania małżeństwa badania są mniej liczne. Analogiczne problemy regresyjne, jak przewidywanie wieku lub czasu trwania zjawisk na podstawie cech demograficznych, są rozwiązywane przy użyciu Random Forest i Gradient Boosting, które regularnie osiągają lepsze wyniki niż sieci neuronowe na danych tabelarycznych. Bhattacharya i in. (2021) w pracy dotyczącej przewidywania stabilności związków zauważyli, że zmienne ekonomiczne (poziom dochodów) i kulturowe (typ małżeństwa, akceptacja rodziców) mają największą moc predykcyjną – co jest spójne z charakterystyką używanego tu zbioru danych.
 
 ---
 
-### Opis implementacji sieci neuronowej
+## 3. Sztuczne Sieci Neuronowe
 
-Sieć neuronowa została zaimplementowana od podstaw w języku Python przy użyciu wyłącznie biblioteki NumPy (bez gotowych frameworków jak TensorFlow czy Keras). Sieć obsługuje:
+### 3.1. Opis implementacji
+
+Sieć neuronowa została zaimplementowana od podstaw w języku Python, wyłącznie przy użyciu biblioteki NumPy (bez TensorFlow ani Keras). Sieć obsługuje:
 - dowolną liczbę warstw ukrytych i neuronów,
 - funkcje aktywacji: ReLU, Sigmoid, Tanh, Leaky ReLU,
 - metody inicjalizacji wag: Xavier, He, LeCun, losową (random),
-- mini-batch stochastyczny gradient prosty (SGD),
-- dwa tryby: klasyfikacja binarna (funkcja straty: BCE + Sigmoid na wyjściu) oraz regresja (MSE + liniowe wyjście).
+- mini-batch SGD (stochastyczny gradient prosty),
+- klasyfikację binarną (funkcja straty BCE, wyjście Sigmoid) oraz regresję (MSE, wyjście liniowe).
 
-Po wstępnym przetworzeniu danych zmienne liczbowe zostały znormalizowane (StandardScaler), a zmienne kategoryczne zakodowane metodą one-hot encoding, co dało łącznie 39 cech wejściowych.
-
-Każdy eksperyment był powtarzany **3-krotnie** z różnymi zarodkami losowości (seed = 42, 43, 44), a wyniki uśrednione.
+Każdy eksperyment był powtarzany **3 razy** z różnymi seedami (42, 43, 44), a wyniki w tabelach to wartości uśrednione. Domyślna konfiguracja bazowa: architektura [16, 8], learning rate = 0,01, epochs = 100, batch size = 32, aktywacja ReLU, inicjalizacja Xavier.
 
 ---
 
-## 3. Analiza wpływu parametrów na skuteczność sieci
+### 3.2. Analiza wpływu parametrów
 
-Poniżej przeanalizowano wpływ **8 parametrów** na wyniki sieci – oddzielnie dla zadania klasyfikacji i regresji. W tabelach podano wartości uśrednione z 3 powtórzeń.
-
-> **Uwaga do klasyfikacji:** Accuracy ~90% we wszystkich konfiguracjach wynika z niezbalansowania danych – sieć nauczyła się przewidywać dominującą klasę (brak rozwodu). Różnice między konfiguracjami są minimalne. Bardziej miarodajną metryką byłaby balanced accuracy lub F1-score.
+> **Uwaga:** Accuracy dla klasyfikacji wynosi ~90% w prawie wszystkich konfiguracjach. Wynika to z niezbalansowania danych – sieć nauczyła się przewidywać zawsze klasę dominującą (brak rozwodu). Różnice między konfiguracjami są lepiej widoczne w zadaniu regresji.
 
 ---
 
-### Parametr 1 – Architektura sieci (liczba warstw i neuronów)
+#### 3.2.1. Architektura sieci (liczba neuronów w warstwach ukrytych)
 
-Testowano cztery architektury warstw ukrytych przy domyślnych pozostałych parametrach (learning rate = 0,01, epochs = 100, batch size = 32, aktywacja ReLU, inicjalizacja Xavier).
+Sprawdzono cztery różne architektury warstw ukrytych przy pozostałych parametrach domyślnych.
 
-| Architektura | Klasyfikacja Train Acc | Klasyfikacja Test Acc | Regresja Train MSE | Regresja Test MSE |
-|---|---|---|---|---|
-| [8] (1 warstwa, 8 neuronów) | 0,8999 | 0,9000 | 190,32 | 204,33 |
-| [16, 8] (2 warstwy) | 0,8999 | 0,9000 | 191,32 | 202,95 |
-| [32, 16] (2 warstwy) | 0,8999 | 0,9000 | 182,75 | 214,09 |
-| [32, 16, 8] (3 warstwy) | 0,8999 | 0,9000 | 197,03 | 199,82 |
+| Architektura | Klas. Train Acc | Klas. Test Acc | Reg. Train MSE | Reg. Test MSE |
+|---|---:|---:|---:|---:|
+| [8] – 1 warstwa | 0,8999 | 0,9000 | 190,32 | 204,33 |
+| [16, 8] – 2 warstwy | 0,8999 | 0,9000 | 191,32 | 202,95 |
+| [32, 16] – 2 warstwy | 0,8999 | 0,9000 | 182,75 | 214,09 |
+| [32, 16, 8] – 3 warstwy | 0,8999 | 0,9000 | 197,03 | **199,82** |
 
-**Wnioski:** Dla klasyfikacji brak różnic – efekt niezbalansowanych danych. Dla regresji najlepszy wynik testowy osiągnęła architektura [32, 16, 8] (MSE = 199,82). Sieć z warstwami [32, 16] wykazała lekkie przetrenowanie (niższy MSE na zbiorze uczącym, wyższy na testowym).
+**Wnioski:** Dla klasyfikacji brak widocznych różnic. Dla regresji najlepszy wynik testowy uzyskała architektura [32, 16, 8] (MSE = 199,82). Architektura [32, 16] wykazała przetrenowanie – niski MSE uczący (182,75), ale wysoki testowy (214,09).
 
 ---
 
-### Parametr 2 – Liczba epok
+#### 3.2.2. Liczba epok
 
-Epoka to jedno pełne przejście przez zbiór uczący. Testowano: 10, 50, 100, 200 epok.
+Sprawdzono cztery wartości liczby epok przy domyślnych pozostałych parametrach.
 
-| Liczba epok | Klasyfikacja Train Acc | Klasyfikacja Test Acc | Regresja Train MSE | Regresja Test MSE |
-|---|---|---|---|---|
-| 10 | 0,8999 | 0,9000 | 196,67 | 199,85 |
+| Liczba epok | Klas. Train Acc | Klas. Test Acc | Reg. Train MSE | Reg. Test MSE |
+|---|---:|---:|---:|---:|
+| 10 | 0,8999 | 0,9000 | 196,67 | **199,85** |
 | 50 | 0,8999 | 0,9000 | 192,58 | 201,27 |
 | 100 | 0,8999 | 0,9000 | 191,32 | 202,95 |
 | 200 | 0,8999 | 0,9000 | 189,36 | 205,56 |
 
-**Wnioski:** Dla klasyfikacji – brak wpływu. Dla regresji: więcej epok powoduje nieznaczne **przetrenowanie** – MSE na zbiorze uczącym maleje (sieć lepiej uczy się danych uczących), ale MSE na zbiorze testowym rośnie (gorzej generalizuje na nowe dane). Najlepszy wynik testowy uzyskano przy 10 epokach, choć różnice są niewielkie.
+**Wnioski:** Dla klasyfikacji brak wpływu. Dla regresji widać klasyczny efekt przetrenowania – im więcej epok, tym niższy MSE uczący, ale wyższy testowy. Najlepszy wynik testowy osiągnięto przy zaledwie 10 epokach (199,85), co sugeruje, że sieć szybko „zapamiętuje" dane zamiast generalizować.
 
 ---
 
-### Parametr 3 – Rozmiar batcha (batch size)
+#### 3.2.3. Rozmiar batcha (batch size)
 
-Batch size to liczba przykładów uczących przetwarzanych naraz przed aktualizacją wag. Testowano: 16, 32, 64, 128.
+Batch size to liczba przykładów przetwarzanych naraz przed aktualizacją wag. Sprawdzono wartości: 16, 32, 64, 128.
 
-| Batch size | Klasyfikacja Train Acc | Klasyfikacja Test Acc | Regresja Train MSE | Regresja Test MSE |
-|---|---|---|---|---|
-| 16 | 0,8999 | 0,9000 | 195,90 | 200,87 |
+| Batch size | Klas. Train Acc | Klas. Test Acc | Reg. Train MSE | Reg. Test MSE |
+|---|---:|---:|---:|---:|
+| 16 | 0,8999 | 0,9000 | 195,90 | **200,87** |
 | 32 | 0,8999 | 0,9000 | 191,32 | 202,95 |
 | 64 | 0,8999 | 0,9000 | 193,79 | 202,66 |
 | 128 | 0,8999 | 0,9000 | 192,53 | 205,28 |
 
-**Wnioski:** Małe batche (16) dają najlepszy wynik testowy dla regresji (MSE = 200,87), ponieważ częstsze aktualizacje wag pozwalają sieci lepiej generalizować. Duże batche (128) pogorszyły wyniki testowe. Dla klasyfikacji brak widocznego efektu.
+**Wnioski:** Mały batch (16) dał najlepszy wynik testowy dla regresji. Częstsze aktualizacje wag przy małym batchu pomagają sieci lepiej generalizować. Duży batch (128) pogorszył wyniki testowe. Dla klasyfikacji brak efektu.
 
 ---
 
-### Parametr 4 – Współczynnik uczenia (learning rate)
+#### 3.2.4. Współczynnik uczenia (learning rate)
 
-Learning rate określa, jak duże kroki wykonuje sieć podczas nauki. Zbyt mały – nauka wolna i może utknąć; zbyt duży – sieć staje się niestabilna. Testowano: 0,001, 0,01, 0,05, 0,1.
+Learning rate określa, jak duże kroki wykonuje sieć podczas nauki. Testowano: 0,001; 0,01; 0,05; 0,1.
 
-| Learning rate | Klasyfikacja Train Acc | Klasyfikacja Test Acc | Regresja Train MSE | Regresja Test MSE |
-|---|---|---|---|---|
+| Learning rate | Klas. Train Acc | Klas. Test Acc | Reg. Train MSE | Reg. Test MSE |
+|---|---:|---:|---:|---:|
 | 0,001 | 0,8999 | 0,9000 | 182,42 | 213,54 |
 | 0,01 | 0,8999 | 0,9000 | 191,32 | 202,95 |
-| 0,05 | 0,9004 | 0,8988 | 197,30 | 200,12 |
+| 0,05 | 0,9004 | 0,8988 | 197,30 | **200,12** |
 | 0,1 | 0,9019 | 0,9027 | 197,52 | 200,36 |
 
-**Wnioski:** Dla regresji: przy małym learning rate (0,001) sieć zbytnio się przetrenowuje – bardzo niski MSE treningowy, ale wysoki testowy. Przy większych wartościach (0,05; 0,1) oba błędy są zbliżone i niskie. Dla klasyfikacji: przy learning rate = 0,05 i 0,1 widać pierwsze sygnały rzeczywistego uczenia się (train accuracy nieznacznie przekroczyła 0,9, co wcześniej się nie zdarzało), choć wyniki testowe są podobne.
+**Wnioski:** Przy małym learning rate (0,001) sieć przetrenowuje się – bardzo niski MSE uczący (182,42), ale wysoki testowy (213,54). Przy większych wartościach (0,05; 0,1) oba błędy są zbliżone i niskie. Dla klasyfikacji przy lr=0,05 i lr=0,1 po raz pierwszy pojawiają się drobne różnice w accuracy, co może świadczyć o początku rzeczywistego uczenia się.
 
 ---
 
-### Parametr 5 – Funkcja aktywacji
+#### 3.2.5. Funkcja aktywacji
 
-Funkcja aktywacji decyduje, jak neuron „reaguje" na sygnał wejściowy. Testowano: ReLU, Sigmoid, Tanh, Leaky ReLU.
+Sprawdzono cztery funkcje aktywacji w warstwach ukrytych: ReLU, Sigmoid, Tanh, Leaky ReLU.
 
-| Funkcja aktywacji | Klasyfikacja Train Acc | Klasyfikacja Test Acc | Regresja Train MSE | Regresja Test MSE |
-|---|---|---|---|---|
-| ReLU | 0,8999 | 0,9000 | 191,32 | 202,95 |
+| Funkcja aktywacji | Klas. Train Acc | Klas. Test Acc | Reg. Train MSE | Reg. Test MSE |
+|---|---:|---:|---:|---:|
+| ReLU | 0,8999 | 0,9000 | 191,32 | **202,95** |
 | Sigmoid | 0,8999 | 0,9000 | 175,98 | 219,63 |
 | Tanh | 0,8999 | 0,9000 | 181,07 | 213,64 |
 | Leaky ReLU | 0,8999 | 0,9000 | 185,22* | 210,23* |
 
-*\*Leaky ReLU w 2 z 3 powtórzeń dla regresji dało wynik NaN (niestabilność numeryczna – eksplodujący gradient). Podano wynik z jedynego udanego powtórzenia.*
+*\*Leaky ReLU w 2 z 3 powtórzeń zwróciła NaN (niestabilność numeryczna – eksplodujący gradient). Podano wynik z jedynego udanego powtórzenia.*
 
-**Wnioski:** Dla klasyfikacji – brak różnic. Dla regresji: ReLU jest **najstabilniejszą i najlepiej generalizującą** funkcją aktywacji (najniższy MSE testowy). Sigmoid i Tanh pokazują silne przetrenowanie (niski MSE uczący, wysoki testowy). Leaky ReLU okazała się niestabilna numerycznie w tej konfiguracji.
+**Wnioski:** Dla klasyfikacji brak różnic. Dla regresji ReLU okazała się najstabilniejsza i dała najlepszy wynik testowy. Sigmoid i Tanh wykazują silne przetrenowanie. Leaky ReLU była niestabilna numerycznie przy domyślnym learning rate.
 
 ---
 
-### Parametr 6 – Metoda inicjalizacji wag
+#### 3.2.6. Metoda inicjalizacji wag
 
-Inicjalizacja wag to sposób nadania sieci wartości początkowych przed uczeniem. Testowano: Xavier, He, Random (małe losowe), LeCun.
+Sprawdzono cztery metody nadawania sieci wartości początkowych przed uczeniem.
 
-| Inicjalizacja | Klasyfikacja Train Acc | Klasyfikacja Test Acc | Regresja Train MSE | Regresja Test MSE |
-|---|---|---|---|---|
+| Inicjalizacja | Klas. Train Acc | Klas. Test Acc | Reg. Train MSE | Reg. Test MSE |
+|---|---:|---:|---:|---:|
 | Xavier | 0,8999 | 0,9000 | 191,32 | 202,95 |
 | He | 0,8999 | 0,9000 | 191,55 | 202,97 |
 | Random | 0,8999 | 0,9000 | 191,93 | 206,39 |
-| LeCun | 0,8999 | 0,9000 | 196,66 | 200,16 |
+| LeCun | 0,8999 | 0,9000 | 196,66 | **200,16** |
 
-**Wnioski:** Xavier, He i LeCun dają podobne wyniki, gdyż wszystkie są metodami zaprojektowanymi do stabilnego uczenia. LeCun osiągnął najlepszy wynik testowy dla regresji (MSE = 200,16). Inicjalizacja Random (małe wartości bliskie zeru) dała nieznacznie gorsze wyniki – bardziej zróżnicowane między powtórzeniami.
+**Wnioski:** Xavier, He i LeCun dają podobne wyniki, bo wszystkie są metodami zaprojektowanymi do stabilnego uczenia. LeCun osiągnął najlepszy wynik testowy dla regresji (MSE = 200,16). Inicjalizacja czysto losowa (Random) dała nieco gorsze wyniki.
 
 ---
 
-### Parametr 7 – Liczba warstw ukrytych
+#### 3.2.7. Liczba warstw ukrytych (przy stałej liczbie neuronów)
 
-Testowano sieci z 1, 2, 3 i 4 warstwami ukrytymi, przy stałej liczbie 32 neuronów w każdej warstwie.
+Sprawdzono sieci z 1, 2, 3 i 4 warstwami ukrytymi, każda z 32 neuronami.
 
-| Liczba warstw | Klasyfikacja Train Acc | Klasyfikacja Test Acc | Regresja Train MSE | Regresja Test MSE |
-|---|---|---|---|---|
+| Konfiguracja | Klas. Train Acc | Klas. Test Acc | Reg. Train MSE | Reg. Test MSE |
+|---|---:|---:|---:|---:|
 | 1 × [32] | 0,8999 | 0,9000 | 168,75 | 229,83 |
 | 2 × [32, 32] | 0,8999 | 0,9000 | 190,99 | 207,27 |
 | 3 × [32, 32, 32] | 0,8999 | 0,9000 | 191,05 | 209,30 |
 | 4 × [32, 32, 32, 32] | 0,8999 | 0,9000 | NaN | NaN |
 
-**Wnioski:** Sieć z 1 warstwą wykazała silne przetrenowanie (duża różnica między MSE uczącym a testowym). Sieci z 2 i 3 warstwami osiągnęły podobne wyniki. Sieć z 4 warstwami zwróciła wartości NaN – sieć stała się zbyt głęboka i doszło do **eksplodującego gradientu** (wartości podczas uczenia wymknęły się spod kontroli). Optymalna głębokość to 2–3 warstwy ukryte.
+**Wnioski:** Jedna szeroka warstwa wykazała silne przetrenowanie (MSE uczący 168,75, testowy 229,83). Dwie i trzy warstwy dały podobne wyniki. Sieć z 4 warstwami zwróciła NaN – doszło do eksplodującego gradientu. Optymalna głębokość to 2–3 warstwy ukryte.
 
 ---
 
-### Parametr 8 – Wielkość zbioru testowego
+#### 3.2.8. Wielkość zbioru testowego
 
-Testowano różne podziały danych na zbiór uczący i testowy: 90%/10%, 80%/20%, 70%/30%, 60%/40%.
+Sprawdzono różne podziały danych na zbiór uczący i testowy.
 
-| Podział (test_size) | Klasyfikacja Train Acc | Klasyfikacja Test Acc | Regresja Train MSE | Regresja Test MSE |
-|---|---|---|---|---|
-| 10% testowy | 0,8999 | 0,9000 | 193,67 | 202,19 |
-| 20% testowy | 0,8999 | 0,9000 | 191,32 | 202,95 |
-| 30% testowy | 0,8999 | 0,9000 | 190,36 | 205,40 |
-| 40% testowy | 0,8999 | 0,9000 | 190,69 | 205,60 |
+| Podział (test_size) | Klas. Train Acc | Klas. Test Acc | Reg. Train MSE | Reg. Test MSE |
+|---|---:|---:|---:|---:|
+| 10% | 0,8999 | 0,9000 | 193,67 | **202,19** |
+| 20% | 0,8999 | 0,9000 | 191,32 | 202,95 |
+| 30% | 0,8999 | 0,9000 | 190,36 | 205,40 |
+| 40% | 0,8999 | 0,9000 | 190,69 | 205,60 |
 
-**Wnioski:** Przy większym zbiorze testowym (mniej danych uczących) wyniki testowe nieznacznie się pogarszają. Najlepszy wynik testowy dla regresji uzyskano przy podziale 90/10. Różnice są jednak małe, co wskazuje, że przy 10 000 obserwacji wielkość próby nie jest krytycznym czynnikiem.
+**Wnioski:** Przy większym zbiorze testowym (mniejszym uczącym) wyniki testowe nieznacznie się pogarszają. Różnice są jednak małe – przy 10 000 obserwacjach wielkość próby nie jest krytycznym czynnikiem.
 
 ---
 
-## 4. Podsumowanie i wnioski
+### 3.3. Podsumowanie SSN
 
-### Zadanie klasyfikacji – przewidywanie rozwodu
+**Klasyfikacja:** Wyniki były rozczarowujące – accuracy na poziomie ~90% niezależnie od konfiguracji. To klasyczny efekt silnie niezbalansowanych danych. Sieć nauczyła się przewidywać zawsze klasę dominującą (brak rozwodu), co daje wysoką dokładność bez faktycznego uczenia się wzorców prowadzących do rozwodu. Do poprawy wyników potrzebne byłoby balansowanie klas lub użycie metryk takich jak F1-score czy balanced accuracy.
 
-Wyniki dla zadania klasyfikacji były rozczarowujące – accuracy utrzymywała się na poziomie ~90% niezależnie od konfiguracji sieci. Jest to klasyczny efekt **silnie niezbalansowanych danych**: w zbiorze około 90% obserwacji to przypadki bez rozwodu. Sieć nauczyła się przewidywać zawsze tę samą klasę (brak rozwodu), co daje wysoką dokładność bez faktycznego uczenia się wzorców prowadzących do rozwodu.
+**Regresja:** Wyniki były bardziej zróżnicowane i sensowne do analizy. Bazowy błąd MSE oscylował wokół 200 (RMSE ≈ 14,1 roku). Sieć myli się więc średnio o około 14 lat przy przewidywaniu czasu trwania małżeństwa. Najlepsze konfiguracje to: architektura [32, 16, 8], learning rate ≥ 0,05, inicjalizacja LeCun, batch size = 16. Widoczne były typowe zjawiska uczenia maszynowego: przetrenowanie (przy małym lr, funkcjach Sigmoid/Tanh, dużej liczbie epok) oraz eksplodujący gradient (4 warstwy, Leaky ReLU).
 
-W takich przypadkach należałoby zastosować techniki wyrównywania klas (np. oversampling mniejszościowej klasy) lub używać innych metryk (np. F1-score, balanced accuracy). W niniejszym projekcie zrealizowano wymagania formalne – zbadano wpływ 8 parametrów, choć ich wpływ na wynik okazał się nieistotny ze względu na wskazany problem.
+---
 
-### Zadanie regresji – przewidywanie liczby lat od ślubu
+## 4. Uczenie Maszynowe
 
-Wyniki dla regresji były bardziej zróżnicowane i sensowne do analizy. Bazowy błąd MSE oscylował wokół 200 (RMSE ≈ 14,1 roku), co oznacza, że sieć myli się średnio o około 14 lat. Wynik ten jest umiarkowany i sugeruje, że cechy zawarte w zbiorze danych jedynie częściowo wyjaśniają liczbę lat od ślubu.
+### 4.1. Opis wybranych metod
 
-**Najważniejsze wnioski z regresji:**
+#### 4.1.1. Drzewo decyzyjne (Decision Tree)
 
-1. **Najlepsza konfiguracja** pod względem błędu testowego: architektura [32, 16, 8], learning rate = 0,05–0,1, inicjalizacja LeCun, batch size = 16.
+Drzewo decyzyjne to model, który uczy się serii reguł „jeśli–to", dzieląc dane na coraz mniejsze grupy. Każdy węzeł drzewa sprawdza jeden warunek (np. czy wiek w chwili ślubu < 25), a liście drzewa zawierają przewidywane wartości. Model jest prosty do interpretacji, ale łatwo się przetrenowuje – szczególnie gdy drzewo jest bardzo głębokie i dopasowuje się do każdej obserwacji w zbiorze uczącym.
 
-2. **Przetrenowanie** było widoczne przy: małym learning rate (0,001), funkcjach aktywacji Sigmoid i Tanh, głębokiej sieci z 1 warstwą o dużej liczbie neuronów.
+#### 4.1.2. Las losowy (Random Forest)
 
-3. **Niestabilność numeryczna** (wyniki NaN) wystąpiła przy: sieci z 4 warstwami ukrytymi (eksplodujący gradient) oraz przy Leaky ReLU z domyślnym learning rate (nadmierne wartości wag).
+Las losowy to zbiór wielu drzew decyzyjnych, z których każde jest uczone na losowo wybranym fragmencie danych i losowym podzbiorze cech. Wynik końcowy to średnia z przewidywań wszystkich drzew (dla regresji) lub głosowanie większościowe (dla klasyfikacji). Dzięki temu model jest bardziej stabilny i mniej podatny na przetrenowanie niż pojedyncze drzewo. Jest jedną z najczęściej stosowanych metod na danych tabelarycznych.
 
-4. **Liczba epok** powyżej 50 pogarsza generalizację – sieć zaczyna „zapamiętywać" dane uczące zamiast uczyć się ogólnych wzorców.
+#### 4.1.3. K najbliższych sąsiadów (KNN)
 
-5. **Funkcja ReLU** okazała się najbardziej stabilna i dała najlepsze wyniki testowe spośród czterech testowanych funkcji aktywacji.
+KNN przewiduje wartość dla nowej obserwacji na podstawie k najbliższych punktów ze zbioru uczącego. Odległość między punktami liczy się najczęściej metryką euklidesową lub manhattan. Algorytm jest prosty, ale wolny przy dużych zbiorach danych, bo musi porównać nowy punkt ze wszystkimi przykładami uczącymi. Ważnym parametrem jest liczba sąsiadów k – zbyt mała powoduje przetrenowanie, zbyt duża – uśrednianie i utratę dokładności.
 
-6. **Metody inicjalizacji wag** Xavier, He i LeCun dają podobne wyniki – wszystkie są poprawne dla tej architektury. Inicjalizacja czysto losowa (small random) jest nieco gorsza i mniej przewidywalna.
+#### 4.1.4. Gradient Boosting
 
-7. **Podział danych** nie miał dużego wpływu na wyniki, co jest korzystną obserwacją – zbiór danych jest wystarczająco duży.
+Gradient Boosting buduje model sekwencyjnie: każde kolejne drzewo poprawia błędy poprzedniego. W odróżnieniu od Random Forest, drzewa nie są niezależne – każde skupia się na obserwacjach, które poprzednie drzewa przewidziały źle. Daje to zazwyczaj lepsze wyniki niż Random Forest, ale jest wolniejsze i bardziej podatne na przetrenowanie przy zbyt dużym learning rate.
 
-### Ogólna konkluzja
+---
 
-Implementacja sieci neuronowej od podstaw pozwoliła zaobserwować typowe zjawiska znane z teorii uczenia maszynowego: przetrenowanie, eksplodujący gradient oraz problem niezbalansowanych klas. Sieć sprawdziła się lepiej w zadaniu regresji niż klasyfikacji, gdzie dominujący wpływ miała nierównowaga klas. Do poprawy wyników klasyfikacji konieczne byłoby zastosowanie technik balansowania danych lub innych metryk oceny.
+### 4.2. Analiza wybranych parametrów
+
+Eksperymenty wykonano przy użyciu biblioteki scikit-learn. Każdy eksperyment powtarzano 3 razy z różnymi seedami. Dla klasyfikacji jako metrykę wybrano **balanced accuracy** (dokładność ważona klasami) zamiast zwykłej accuracy, bo zwykła accuracy jest myląca przy niezbalansowanych danych. Dla regresji zastosowano **RMSE** (pierwiastek z MSE).
+
+---
+
+#### 4.2.1. Drzewo decyzyjne – parametr max_depth
+
+Parametr `max_depth` kontroluje maksymalną głębokość drzewa. Większa głębokość oznacza bardziej szczegółowy model, ale też większe ryzyko przetrenowania.
+
+**Klasyfikacja (Divorce_Status):**
+
+| max_depth | Train Balanced Acc | Test Balanced Acc |
+|---:|---:|---:|
+| 3 | 0,5000 | 0,5000 |
+| 5 | 0,5031 | 0,5000 |
+| 10 | 0,6034 | 0,5029 |
+| 20 | 0,9668 | 0,4933 |
+
+**Regresja (Years_Since_Marriage):**
+
+| max_depth | Train RMSE | Test RMSE |
+|---:|---:|---:|
+| 3 | 14,00 | **14,15** |
+| 5 | 13,89 | 14,29 |
+| 10 | 12,25 | 15,82 |
+| 20 | 2,41 | 20,34 |
+
+**Wnioski:** Dla klasyfikacji głębokie drzewo (max_depth=20) osiąga prawie idealną dokładność na zbiorze uczącym (0,97), ale na testowym spada poniżej poziomu losowego (0,49). To skrajne przetrenowanie. Dla regresji najlepszy wynik testowy (RMSE = 14,15) uzyskało płytkie drzewo (max_depth=3). Głębsze drzewa przetrenowują się – drzewo z max_depth=20 ma RMSE=2,41 na uczącym, ale 20,34 na testowym.
+
+---
+
+#### 4.2.2. Las losowy – parametr n_estimators
+
+Parametr `n_estimators` to liczba drzew w lesie. Więcej drzew zazwyczaj daje lepsze i stabilniejsze wyniki, ale wydłuża czas uczenia.
+
+**Klasyfikacja (Divorce_Status):**
+
+| n_estimators | Train Balanced Acc | Test Balanced Acc |
+|---:|---:|---:|
+| 50 | 0,5065 | 0,5000 |
+| 100 | 0,5044 | 0,5000 |
+| 200 | 0,5037 | 0,5000 |
+| 300 | 0,5037 | 0,5000 |
+
+**Regresja (Years_Since_Marriage):**
+
+| n_estimators | Train RMSE | Test RMSE |
+|---:|---:|---:|
+| 50 | 11,62 | 14,25 |
+| 100 | 11,62 | 14,23 |
+| 200 | 11,60 | 14,23 |
+| 300 | 11,60 | **14,22** |
+
+**Wnioski:** Dla klasyfikacji balanced accuracy jest stale na poziomie 0,5 – las losowy nie radzi sobie z niezbalansowanymi klasami. Dla regresji wyniki poprawiają się wraz z liczbą drzew, ale różnice między 100, 200 i 300 drzewami są bardzo małe. Najlepszy wynik testowy (14,22) uzyskano przy 300 drzewach.
+
+---
+
+#### 4.2.3. KNN – parametr n_neighbors
+
+Parametr `n_neighbors` to liczba sąsiadów branych pod uwagę. Mała liczba powoduje przetrenowanie, duża – nadmierne uśrednianie.
+
+**Klasyfikacja (Divorce_Status):**
+
+| n_neighbors | Train Balanced Acc | Test Balanced Acc |
+|---:|---:|---:|
+| 3 | 0,5953 | 0,5033 |
+| 5 | 0,5247 | 0,5031 |
+| 11 | 0,5006 | 0,4997 |
+| 21 | 0,5000 | 0,5000 |
+
+**Regresja (Years_Since_Marriage):**
+
+| n_neighbors | Train RMSE | Test RMSE |
+|---:|---:|---:|
+| 3 | 11,43 | 16,34 |
+| 5 | 12,60 | 15,37 |
+| 11 | 13,48 | 14,74 |
+| 21 | 13,74 | **14,52** |
+
+**Wnioski:** Dla klasyfikacji KNN nie pomaga przy niezbalansowanych danych. Dla regresji widać klasyczną zależność: mała liczba sąsiadów (k=3) przetrenowuje się – dobry wynik uczący (11,43), zły testowy (16,34). Wraz ze wzrostem k wynik testowy się poprawia. Najlepszy wynik przy k=21 (RMSE = 14,52).
+
+---
+
+#### 4.2.4. Gradient Boosting – parametr learning_rate
+
+Parametr `learning_rate` kontroluje, jak duże poprawki wnosi każde kolejne drzewo. Zbyt duży może powodować niestabilność, zbyt mały – wolne uczenie.
+
+**Klasyfikacja (Divorce_Status):**
+
+| learning_rate | Train Balanced Acc | Test Balanced Acc |
+|---:|---:|---:|
+| 0,01 | 0,5000 | 0,5000 |
+| 0,05 | 0,5000 | 0,5000 |
+| 0,10 | 0,5000 | 0,5000 |
+| 0,20 | 0,5006 | 0,5000 |
+
+**Regresja (Years_Since_Marriage):**
+
+| learning_rate | Train RMSE | Test RMSE |
+|---:|---:|---:|
+| 0,01 | 13,98 | **14,14** |
+| 0,05 | 13,86 | 14,17 |
+| 0,10 | 13,75 | 14,21 |
+| 0,20 | 13,57 | 14,31 |
+
+**Wnioski:** Dla klasyfikacji Gradient Boosting nie daje niczego lepszego – ten sam problem niezbalansowanych danych. Dla regresji najlepszy wynik testowy uzyskano przy learning_rate = 0,01 (RMSE = 14,14). Przy wyższych wartościach uczący RMSE maleje (model lepiej dopasowuje dane uczące), ale testowy rośnie – zaczyna się przetrenowanie.
+
+---
+
+### 4.3. Porównanie metod uczenia maszynowego
+
+Porównanie wykonano przy wynikach testowych z każdej metody (przy jej najlepszej sprawdzonej wartości parametru).
+
+**Klasyfikacja (Divorce_Status) – balanced accuracy:**
+
+| Metoda | Najlepszy parametr | Test Balanced Acc |
+|---|---|---:|
+| Drzewo decyzyjne | max_depth=10 | 0,5029 |
+| Las losowy | n_estimators=50 | 0,5000 |
+| KNN | n_neighbors=3 | 0,5033 |
+| Gradient Boosting | learning_rate=0,20 | 0,5000 |
+
+Wszystkie metody osiągają balanced accuracy bliskie 0,50 – czyli poziom losowego zgadywania. Jest to bezpośrednia konsekwencja niezbalansowanych klas. Żadna z metod nie nauczyła się rzeczywiście wykrywać przypadków rozwodu.
+
+**Regresja (Years_Since_Marriage) – RMSE:**
+
+| Metoda | Najlepszy parametr | Train RMSE | Test RMSE |
+|---|---|---:|---:|
+| Drzewo decyzyjne | max_depth=3 | 14,00 | **14,15** |
+| Gradient Boosting | learning_rate=0,01 | 13,98 | 14,14 |
+| Las losowy | n_estimators=300 | 11,60 | 14,22 |
+| KNN | n_neighbors=21 | 13,74 | 14,52 |
+| SSN | [32,16,8], lr=0,05 | ~14,0 | ~14,1 |
+
+Dla regresji wyniki są zbliżone: RMSE testowy mieści się w przedziale 14,1–14,5 roku. Najlepszy wynik uzyskały Gradient Boosting i Drzewo decyzyjne (RMSE ≈ 14,14–14,15). Las losowy jest bardzo stabilny, ale podobny poziomem do pozostałych. KNN wypada najgorzej z testowym RMSE = 14,52.
+
+---
+
+## 5. Podsumowanie i wnioski końcowe
+
+### Zadanie klasyfikacji
+
+Wyniki dla klasyfikacji były rozczarowujące niezależnie od zastosowanej metody – zarówno SSN, jak i wszystkie metody uczenia maszynowego osiągnęły balanced accuracy na poziomie losowym (~0,50). Przyczyną jest silne niezbalansowanie klas: ~90% obserwacji to małżeństwa bez rozwodu. Modele nauczyły się po prostu zawsze przewidywać brak rozwodu.
+
+Aby poprawić wyniki, należałoby zastosować:
+- oversampling klasy mniejszościowej (np. SMOTE),
+- inne funkcje straty uwzględniające nierównowagę klas,
+- balanced accuracy lub F1-score jako kryterium optymalizacji.
+
+### Zadanie regresji
+
+Wyniki dla regresji były sensowne i zbliżone we wszystkich metodach: RMSE ≈ 14 lat, co oznacza, że modele mylą się średnio o około 14 lat przy przewidywaniu czasu trwania małżeństwa. Biorąc pod uwagę, że zmienna Years_Since_Marriage ma szeroki zakres, jest to wynik umiarkowany – cechy zawarte w zbiorze danych tylko częściowo wyjaśniają liczbę lat od ślubu.
+
+Najważniejsze obserwacje:
+1. **Drzewo decyzyjne** sprawuje się najlepiej przy małej głębokości (max_depth=3). Głębsze drzewa się przetrenowują.
+2. **Las losowy** jest najbardziej stabilny – małe różnice między wynikiem uczącym a testowym.
+3. **Gradient Boosting** uzyskał najlepszy wynik testowy (RMSE = 14,14) przy małym learning_rate = 0,01.
+4. **KNN** jest wrażliwy na liczbę sąsiadów i wypada nieco gorzej niż metody drzewiaste.
+5. **SSN** osiąga porównywalny wynik do najlepszych metod klasycznych, co pokazuje, że dla danych tabelarycznych prostsze metody radzą sobie równie dobrze.
+
+Ogólny wniosek: dla tego zbioru danych i tych problemów metody drzewiaste (zwłaszcza Gradient Boosting i Las losowy) działają co najmniej tak samo dobrze jak sieć neuronowa, a często lepiej – bo są mniej podatne na przetrenowanie i nie wymagają precyzyjnego doboru tak wielu hiperparametrów.
