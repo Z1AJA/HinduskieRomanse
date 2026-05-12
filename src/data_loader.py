@@ -35,11 +35,6 @@ class PreparedDataset:
 
 
 class ProjectDataLoader:
-    """
-    Jedno źródło prawdy dla przygotowania danych w projekcie.
-    Zasada: reszta zespołu importuje to miejsce, a nie robi własnych wariacji preprocessingu.
-    """
-
     REQUIRED_COLUMNS = [
         "ID",
         "Marriage_Type",

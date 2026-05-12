@@ -1,0 +1,97 @@
+task,run_id,param_name,param_value,train_metric,test_metric,epochs,learning_rate,batch_size,hidden_layers,hidden_units
+classification_divorce,1778524312_0,hidden_layer_sizes,[8],0.899875,0.9,100,0.01,32,1,8
+classification_divorce,1778524312_1,hidden_layer_sizes,[8],0.899875,0.9,100,0.01,32,1,8
+classification_divorce,1778524312_2,hidden_layer_sizes,[8],0.899875,0.9,100,0.01,32,1,8
+classification_divorce,1778524312_0,hidden_layer_sizes,"[16, 8]",0.899875,0.9,100,0.01,32,2,16-8
+classification_divorce,1778524312_1,hidden_layer_sizes,"[16, 8]",0.899875,0.9,100,0.01,32,2,16-8
+classification_divorce,1778524312_2,hidden_layer_sizes,"[16, 8]",0.899875,0.9,100,0.01,32,2,16-8
+classification_divorce,1778524312_0,hidden_layer_sizes,"[32, 16]",0.899875,0.9,100,0.01,32,2,32-16
+classification_divorce,1778524312_1,hidden_layer_sizes,"[32, 16]",0.899875,0.9,100,0.01,32,2,32-16
+classification_divorce,1778524312_2,hidden_layer_sizes,"[32, 16]",0.899875,0.9,100,0.01,32,2,32-16
+classification_divorce,1778524312_0,hidden_layer_sizes,"[32, 16, 8]",0.899875,0.9,100,0.01,32,3,32-16-8
+classification_divorce,1778524312_1,hidden_layer_sizes,"[32, 16, 8]",0.899875,0.9,100,0.01,32,3,32-16-8
+classification_divorce,1778524312_2,hidden_layer_sizes,"[32, 16, 8]",0.899875,0.9,100,0.01,32,3,32-16-8
+classification_divorce,1778524404_0,epochs,10,0.899875,0.9,10,0.01,32,2,16-8
+classification_divorce,1778524404_1,epochs,10,0.899875,0.9,10,0.01,32,2,16-8
+classification_divorce,1778524404_2,epochs,10,0.899875,0.9,10,0.01,32,2,16-8
+classification_divorce,1778524404_0,epochs,50,0.899875,0.9,50,0.01,32,2,16-8
+classification_divorce,1778524404_1,epochs,50,0.899875,0.9,50,0.01,32,2,16-8
+classification_divorce,1778524404_2,epochs,50,0.899875,0.9,50,0.01,32,2,16-8
+classification_divorce,1778524404_0,epochs,100,0.899875,0.9,100,0.01,32,2,16-8
+classification_divorce,1778524404_1,epochs,100,0.899875,0.9,100,0.01,32,2,16-8
+classification_divorce,1778524404_2,epochs,100,0.899875,0.9,100,0.01,32,2,16-8
+classification_divorce,1778524404_0,epochs,200,0.899875,0.9,200,0.01,32,2,16-8
+classification_divorce,1778524404_1,epochs,200,0.899875,0.9,200,0.01,32,2,16-8
+classification_divorce,1778524404_2,epochs,200,0.899875,0.9,200,0.01,32,2,16-8
+classification_divorce,1778524483_0,batch_size,16,0.899875,0.9,100,0.01,16,2,16-8
+classification_divorce,1778524483_1,batch_size,16,0.899875,0.9,100,0.01,16,2,16-8
+classification_divorce,1778524483_2,batch_size,16,0.899875,0.8995,100,0.01,16,2,16-8
+classification_divorce,1778524483_0,batch_size,32,0.899875,0.9,100,0.01,32,2,16-8
+classification_divorce,1778524483_1,batch_size,32,0.899875,0.9,100,0.01,32,2,16-8
+classification_divorce,1778524483_2,batch_size,32,0.899875,0.9,100,0.01,32,2,16-8
+classification_divorce,1778524483_0,batch_size,64,0.899875,0.9,100,0.01,64,2,16-8
+classification_divorce,1778524483_1,batch_size,64,0.899875,0.9,100,0.01,64,2,16-8
+classification_divorce,1778524483_2,batch_size,64,0.899875,0.9,100,0.01,64,2,16-8
+classification_divorce,1778524483_0,batch_size,128,0.899875,0.9,100,0.01,128,2,16-8
+classification_divorce,1778524483_1,batch_size,128,0.899875,0.9,100,0.01,128,2,16-8
+classification_divorce,1778524483_2,batch_size,128,0.899875,0.9,100,0.01,128,2,16-8
+classification_divorce,1778524572_0,learning_rate,0.001,0.899875,0.9,100,0.001,32,2,16-8
+classification_divorce,1778524572_1,learning_rate,0.001,0.899875,0.9,100,0.001,32,2,16-8
+classification_divorce,1778524572_2,learning_rate,0.001,0.899875,0.9,100,0.001,32,2,16-8
+classification_divorce,1778524572_0,learning_rate,0.01,0.899875,0.9,100,0.01,32,2,16-8
+classification_divorce,1778524572_1,learning_rate,0.01,0.899875,0.9,100,0.01,32,2,16-8
+classification_divorce,1778524572_2,learning_rate,0.01,0.899875,0.9,100,0.01,32,2,16-8
+classification_divorce,1778524572_0,learning_rate,0.05,0.899875,0.9,100,0.05,32,2,16-8
+classification_divorce,1778524572_1,learning_rate,0.05,0.9005,0.8985,100,0.05,32,2,16-8
+classification_divorce,1778524572_2,learning_rate,0.05,0.900875,0.898,100,0.05,32,2,16-8
+classification_divorce,1778524572_0,learning_rate,0.1,0.90025,0.9,100,0.1,32,2,16-8
+classification_divorce,1778524572_1,learning_rate,0.1,0.9035,0.894,100,0.1,32,2,16-8
+classification_divorce,1778524572_2,learning_rate,0.1,0.902,0.894,100,0.1,32,2,16-8
+classification_divorce,1778524644_0,activation,relu,0.899875,0.9,100,0.01,32,2,16-8
+classification_divorce,1778524644_1,activation,relu,0.899875,0.9,100,0.01,32,2,16-8
+classification_divorce,1778524644_2,activation,relu,0.899875,0.9,100,0.01,32,2,16-8
+classification_divorce,1778524644_0,activation,sigmoid,0.899875,0.9,100,0.01,32,2,16-8
+classification_divorce,1778524644_1,activation,sigmoid,0.899875,0.9,100,0.01,32,2,16-8
+classification_divorce,1778524644_2,activation,sigmoid,0.899875,0.9,100,0.01,32,2,16-8
+classification_divorce,1778524644_0,activation,tanh,0.899875,0.9,100,0.01,32,2,16-8
+classification_divorce,1778524644_1,activation,tanh,0.899875,0.9,100,0.01,32,2,16-8
+classification_divorce,1778524644_2,activation,tanh,0.899875,0.9,100,0.01,32,2,16-8
+classification_divorce,1778524644_0,activation,leaky_relu,0.899875,0.9,100,0.01,32,2,16-8
+classification_divorce,1778524644_1,activation,leaky_relu,0.899875,0.9,100,0.01,32,2,16-8
+classification_divorce,1778524644_2,activation,leaky_relu,0.899875,0.9,100,0.01,32,2,16-8
+classification_divorce,1778524731_0,weight_init,xavier,0.899875,0.9,100,0.01,32,2,16-8
+classification_divorce,1778524731_1,weight_init,xavier,0.899875,0.9,100,0.01,32,2,16-8
+classification_divorce,1778524731_2,weight_init,xavier,0.899875,0.9,100,0.01,32,2,16-8
+classification_divorce,1778524731_0,weight_init,he,0.899875,0.9,100,0.01,32,2,16-8
+classification_divorce,1778524731_1,weight_init,he,0.899875,0.9,100,0.01,32,2,16-8
+classification_divorce,1778524731_2,weight_init,he,0.899875,0.9,100,0.01,32,2,16-8
+classification_divorce,1778524731_0,weight_init,random,0.899875,0.9,100,0.01,32,2,16-8
+classification_divorce,1778524731_1,weight_init,random,0.899875,0.9,100,0.01,32,2,16-8
+classification_divorce,1778524731_2,weight_init,random,0.899875,0.9,100,0.01,32,2,16-8
+classification_divorce,1778524731_0,weight_init,lecun,0.899875,0.9,100,0.01,32,2,16-8
+classification_divorce,1778524731_1,weight_init,lecun,0.899875,0.9,100,0.01,32,2,16-8
+classification_divorce,1778524731_2,weight_init,lecun,0.899875,0.9,100,0.01,32,2,16-8
+classification_divorce,1778524805_0,hidden_layer_sizes,[32],0.899875,0.9,100,0.01,32,1,32
+classification_divorce,1778524805_1,hidden_layer_sizes,[32],0.899875,0.9,100,0.01,32,1,32
+classification_divorce,1778524805_2,hidden_layer_sizes,[32],0.899875,0.9,100,0.01,32,1,32
+classification_divorce,1778524805_0,hidden_layer_sizes,"[32, 32]",0.899875,0.9,100,0.01,32,2,32-32
+classification_divorce,1778524805_1,hidden_layer_sizes,"[32, 32]",0.899875,0.9,100,0.01,32,2,32-32
+classification_divorce,1778524805_2,hidden_layer_sizes,"[32, 32]",0.899875,0.9,100,0.01,32,2,32-32
+classification_divorce,1778524805_0,hidden_layer_sizes,"[32, 32, 32]",0.899875,0.9,100,0.01,32,3,32-32-32
+classification_divorce,1778524805_1,hidden_layer_sizes,"[32, 32, 32]",0.899875,0.9,100,0.01,32,3,32-32-32
+classification_divorce,1778524805_2,hidden_layer_sizes,"[32, 32, 32]",0.899875,0.9,100,0.01,32,3,32-32-32
+classification_divorce,1778524805_0,hidden_layer_sizes,"[32, 32, 32, 32]",0.899875,0.9,100,0.01,32,4,32-32-32-32
+classification_divorce,1778524805_1,hidden_layer_sizes,"[32, 32, 32, 32]",0.899875,0.9,100,0.01,32,4,32-32-32-32
+classification_divorce,1778524805_2,hidden_layer_sizes,"[32, 32, 32, 32]",0.899875,0.9,100,0.01,32,4,32-32-32-32
+classification_divorce,1778524902_0,test_size,0.1,0.8998888888888888,0.9,100,0.01,32,2,16-8
+classification_divorce,1778524902_1,test_size,0.1,0.8998888888888888,0.9,100,0.01,32,2,16-8
+classification_divorce,1778524902_2,test_size,0.1,0.8998888888888888,0.9,100,0.01,32,2,16-8
+classification_divorce,1778524902_0,test_size,0.2,0.899875,0.9,100,0.01,32,2,16-8
+classification_divorce,1778524902_1,test_size,0.2,0.899875,0.9,100,0.01,32,2,16-8
+classification_divorce,1778524902_2,test_size,0.2,0.899875,0.9,100,0.01,32,2,16-8
+classification_divorce,1778524902_0,test_size,0.3,0.8998571428571429,0.9,100,0.01,32,2,16-8
+classification_divorce,1778524902_1,test_size,0.3,0.8998571428571429,0.9,100,0.01,32,2,16-8
+classification_divorce,1778524902_2,test_size,0.3,0.8998571428571429,0.9,100,0.01,32,2,16-8
+classification_divorce,1778524902_0,test_size,0.4,0.8998333333333334,0.9,100,0.01,32,2,16-8
+classification_divorce,1778524902_1,test_size,0.4,0.8998333333333334,0.9,100,0.01,32,2,16-8
+classification_divorce,1778524902_2,test_size,0.4,0.8998333333333334,0.9,100,0.01,32,2,16-8

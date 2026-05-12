@@ -27,14 +27,6 @@ TASK_CONFIGS = {
         "recommended_metrics": ["accuracy", "balanced_accuracy", "macro_f1"],
         "notes": "Opcjonalny task wieloklasowy."
     },
-        "regression_children": {
-        "problem_type": "regression",
-        "target": "Children_Count",
-        "drop_columns": ["ID"],
-        "stratify": False,
-        "recommended_metrics": ["mse", "rmse", "mae", "r2"],
-        "notes": "Dodatkowy target regresyjny, o słabszej interpretowalności."
-    },
     "regression_years": {
         "problem_type": "regression",
         "target": "Years_Since_Marriage",
