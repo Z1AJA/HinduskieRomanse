@@ -27,7 +27,7 @@ TASK_CONFIGS = {
         "recommended_metrics": ["accuracy", "balanced_accuracy", "macro_f1"],
         "notes": "Opcjonalny task wieloklasowy."
     },
-        "regression_years": {
+    "regression_years": {
         "problem_type": "regression",
         "target": "Years_Since_Marriage",
         "drop_columns": ["ID"],
